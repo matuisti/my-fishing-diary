@@ -8,8 +8,14 @@
 # testing
 /coverage
 
+config.ts
+
 # production
 /build
+/build-lambda
+/built-lambda
+/.netlify
+.netlify
 
 # misc
 .DS_Store
