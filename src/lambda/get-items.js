@@ -1,29 +1,38 @@
 import faunadb from 'faunadb';
-import { FAUNA_SECRET } from '../../config';
+import { authClient } from './client';
 const q = faunadb.query;
 
-const client = new faunadb.Client({
-  secret: FAUNA_SECRET
-});
-
 exports.handler = async (event, context) => {
-  return client.query(q.Paginate(q.Match(q.Ref('indexes/items'))))
-  .then(response => {
-    const itemRefs = response.data.map(ref => q.Get(ref));
-    return client.query(itemRefs)
-      .then((ret) => ret.map(x => ({ ...x.data, id: x.ref.id })))
-      .then((wellformedData) => {
-      return {
-        statusCode: 200,
-        body: JSON.stringify(wellformedData)
-      };
-    });
-  })
-  .catch(error => {
-    console.log('error', error);
+  const { headers: { token } } = event;
+  const { userId } = event.queryStringParameters;
+  
+  if (!userId) {
     return {
       statusCode: 400,
-      body: JSON.stringify(error)
+      body: JSON.stringify({
+        message: 'give userId'
+      })
+    }
+  }
+
+  try {
+    const { data } = await authClient(token).query(
+      q.Map(
+        q.Paginate(q.Match(q.Index('diary_items_by_id'), userId)),
+        q.Lambda(x => q.Get(x))
+      )
+    );
+
+    const finalData = data.map(obj => ({ id: obj.ref.id, ...obj.data }));
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(finalData)
+    }
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: error.message })
     };
-  });
+  }
 };

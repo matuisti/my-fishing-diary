@@ -1,35 +1,86 @@
 
-import api from '../api/api';
+import { toast } from 'react-toastify';
 
-const getStores = async (dispatch: any) => {
+import {
+    createItemApi, createUserApi, deleteItemApi, getItemsApi, Ilogin, loginApi, logoutApi,
+    updateItemApi
+} from '../api/api';
+import { getCurrentUser } from '../helpers/helper';
+
+export type ModalTypes = 'LOGIN' | 'NEW_DIARY_POST' | 'VIEW_DIARY_POST' | null;
+
+interface IModalTypes {
+  type: ModalTypes;
+  active: boolean;
+  modalData?: any;
+};
+
+const getItems = async (dispatch: any) => {
   try {
-    // const res = await api.getStores();
-    // dispatch({type: 'SET_STORES', stores: res.data});
+    const user = getCurrentUser();
+    const response = await getItemsApi(user.token, user.userId);
+    dispatch({type: 'SET_ITEMS', items: response});
   } catch (error) {
-    dispatch({type: 'SET_INFO', info: { message: error.response.data, level: 'ERROR', active: true }});
+    toast.error('Jokin meni vikaan.. 😢');
+  }
+};
+ 
+const createItem = async (dispatch: React.Dispatch<any>, item: any) => {
+  try {
+    const user = getCurrentUser();
+    const date = Date.now();
+    return await createItemApi(user.token, { ...item, userId: user.userId, createdAt: date });
+  } catch (error) {
+    throw error;
+  }
+}
+
+const updateItem = async (item: any) => {
+  try {
+    const user = getCurrentUser();
+    return await updateItemApi(user.token, item);
+  } catch (error) {
+    
+  }
+}
+
+const deleteItem = async (itemId: string) => {
+  try {
+    await deleteItemApi(itemId);
+  } catch (error) {
+    throw error;
+  }
+}
+
+const register = async (dispatch: React.Dispatch<any>, credentials: Ilogin) => {
+  try {
+    return await createUserApi(credentials);
+  } catch (error) {
+    throw error;
   }
 };
 
-const login = async (dispatch: any, userCredentials: any) => {
+const login = async (dispatch: React.Dispatch<any>, credentials: Ilogin) => {
   try {
-    const response = await api.login(userCredentials);
-    // if (response.user) {
-    //   const { user } = response;
-    //   const data = { uid: user.uid, email: user.email };
-    //   dispatch({ type: 'LOGIN_SUCCESS', userData: data });
-    //   localStorage.setItem('currentUser', JSON.stringify(data));
-    // } else {
-    //   dispatch({ type: 'LOGIN_ERROR', error: response.errors[0] });
-    //   return;
-    // }
+    const response = await loginApi(credentials);
+    if (response.token) {
+      const { username, token, userId } = response;
+      const data = { userId: userId, token: token, username: username };
+      dispatch({ type: 'LOGIN_SUCCESS', user: data });
+      localStorage.setItem('currentUser', JSON.stringify(data));
+    } else {
+      console.log("JEEE")
+      dispatch({ type: 'LOGIN_ERROR', error: response.errors[0] });
+      return;
+    }
   } catch (error) {
-    dispatch({ type: 'LOGIN_ERROR', error: error });
+    throw error;
   }
 };
 
-const logout = async (dispatch: any) => {
+const logout = async (dispatch: any, token: string) => {
   try {
-    await api.logout();
+    await logoutApi(token);
     localStorage.removeItem('currentUser');
     dispatch({ type: 'LOGOUT' });
   } catch (error) {
@@ -38,19 +89,17 @@ const logout = async (dispatch: any) => {
   };
 };
 
-
-type modalTypes = {
-  type: 'LOGIN' | null
-  active: boolean
-};
-
-const handleModal = (dispatch: React.Dispatch<any>, modal: modalTypes) => {
+const handleModal = (dispatch: React.Dispatch<any>, modal: IModalTypes) => {
   dispatch({ type: 'HANDLE_MODAL',  modal })
 };
 
 export {
-  getStores, 
+  getItems,
+  register,
   login,
   logout,
-  handleModal
+  handleModal,
+  createItem,
+  deleteItem,
+  updateItem
 };

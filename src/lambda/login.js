@@ -1,26 +1,27 @@
 import faunadb from 'faunadb';
-import { FAUNA_SECRET } from '../../config';
+import { client } from './client';
 const q = faunadb.query;
 
-const client = new faunadb.Client({
-  secret: FAUNA_SECRET
-});
-
 exports.handler = async (event, context) => {
-  const data = JSON.parse(event.body);
-  return client.query(q.Login(q.Match(q.Index("users_by_name"), data.username), { password: data.password }))
-  .then(response => {
-    console.log(response);
+  const body = JSON.parse(event.body);
+  try {
+    const response = await client.query(q.Login(q.Match(q.Index("users_by_name"), body.username), {
+      password: body.password
+    }));
+
     return {
       statusCode: 200,
-      body: JSON.stringify({message: 'authentication success', secret: response.secret})
+      body: JSON.stringify({
+        message: 'authentication success',
+        username: body.username,
+        token: response.secret,
+        userId: response.instance.id
+      })
     }
-  })
-  .catch(error => {
-    console.log('error', error);
+  } catch (error) {
     return {
-      statusCode: 401,
+      statusCode: error.requestResult.statusCode,
       body: JSON.stringify({ message: error.message })
     };
-  });
+  }
 };

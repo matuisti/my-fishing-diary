@@ -1,11 +1,15 @@
-import { getStores, login, logout, handleModal } from './actions';
-import { store, StateProvider} from './store';
+import { getItems, register, login, logout, handleModal, createItem, deleteItem, updateItem } from './actions';
+import { store, StateProvider } from './store';
  
 export { 
   store,
   StateProvider,
-  getStores,
+  getItems,
+  register,
   login,
   logout,
-  handleModal
+  handleModal,
+  createItem,
+  deleteItem,
+  updateItem
 };

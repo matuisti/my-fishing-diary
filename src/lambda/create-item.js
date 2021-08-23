@@ -1,28 +1,38 @@
 import faunadb from 'faunadb';
-import { FAUNA_SECRET } from '../../config';
+import { authClient } from './client';
 const q = faunadb.query;
 
-const client = new faunadb.Client({
-  secret: FAUNA_SECRET
-});
+exports.handler = async (event, context) => {
 
-exports.handler = async (event, context, callback) => {
-  const data = JSON.parse(event.body);
-  return client.query(q.Create(q.Collection('shop_items'), {
-    data
-  })).then((ret) => { 
-    return { ...ret.data, id: ret.ref.id }
-  }).then((res) => {
-    console.log("success", res)
-    return {
-      statusCode: 200,
-      body: JSON.stringify(res)
-    }
-  }).catch((error) => {
-    console.log("error", error)
+  const { headers: { token } } = event;
+  
+  if (!token) {
     return {
       statusCode: 400,
-      body: JSON.stringify(error)
+      body: JSON.stringify({
+        message: 'give valid token'
+      })
     }
-  })
+  }
+
+  try {
+    const body = JSON.parse(event.body);
+    const { ref, data } = await authClient(token).query(
+      q.Create(q.Collection('diary_items'), {
+        data: body
+      })
+    );
+    return { 
+      statusCode: 200,
+      body: JSON.stringify({
+        ...data, 
+        id: ref.id 
+      })
+    }
+  } catch (error) {
+    return {
+      statusCode: error.requestResult.statusCode,
+      body: JSON.stringify({ message: error.message })
+    }
+  }
 };

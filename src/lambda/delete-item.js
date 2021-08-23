@@ -1,32 +1,24 @@
 import faunadb from 'faunadb';
-import { FAUNA_SECRET } from '../../config';
+import { client } from './client';
 const q = faunadb.query;
 
-const client = new faunadb.Client({
-  secret: FAUNA_SECRET
-});
-
 exports.handler = async (event, context) => {
-  const id = event.path.match(/([^\/]*)\/*$/)[0]
-  return client.query(
-    q.Delete(
-      q.Ref(q.Collection('shop_items'), id)
-    )
-  ).then((ret) => { 
-    return { ...ret.data, id: ret.ref.id }
-  })
-  .then(response => {
-    console.log('removed', response);
+  const id = event.path.match(/([^\/]*)\/*$/)[0];
+
+  try {
+    const { data } = await client.query(
+      q.Delete(
+        q.Ref(q.Collection('diary_items'), id)
+      )
+    );
     return {
       statusCode: 200,
-      body: JSON.stringify(response)
+      body: JSON.stringify(data)
     };
-  })
-  .catch(error => {
-    console.log('error', error);
+  } catch (error) {
     return {
       statusCode: 400,
       body: JSON.stringify(error)
     };
-  });
+  }
 };

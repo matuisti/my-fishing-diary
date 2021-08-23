@@ -1,21 +1,27 @@
-import { useContext, ReactNode, useEffect } from 'react';
-import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles';
+import { ReactNode, useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import { handleModal, store } from '../context/index';
+import CloseIcon from '@material-ui/icons/Close';
+
+import { deleteItem, getItems, handleModal, store } from '../context/index';
+import { timeFormatter } from '../helpers/helper';
 import LoginForm from './LoginForm';
+import PostForm from './PostForm';
 
 const styles = (theme: Theme) =>
   createStyles({
     root: {
       margin: 0,
       padding: theme.spacing(2),
+
     },
     closeButton: {
       position: 'absolute',
@@ -36,11 +42,9 @@ const DialogTitle = withStyles(styles)((props: DialogTitleProps) => {
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <Typography variant="h6">{children}</Typography>
-      {onClose ? (
-        <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      ) : null}
+      <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+        <CloseIcon />
+      </IconButton>
     </MuiDialogTitle>
   );
 });
@@ -62,22 +66,69 @@ const Modal = () => {
   const { state, dispatch } = useContext(store);
   const { modal } = state;
 
-  const handleClose = () => {
+  const [readOnly, setReadOnly] = useState<boolean>(true);
+
+  const handleModalClose = () => {
     handleModal(dispatch, { type: null, active: false });
   };
 
-  console.log(modal)
+  const handleDelete = () => {
+    const { modal: { modalData: { id } } } = state;
+    deleteItem(id).then(() => {
+      toast.success('Kirjaus poistettu!');
+      getItems(dispatch);
+      handleModalClose();
+    }).catch(() => {
+      toast.error('Jokin meni vikaan.. 😢');
+    });
+  }
 
   return (
-    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={modal.active}>
-      <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-        Kirjaudu sisään
+    <Dialog fullWidth={true} onClose={handleModalClose} aria-labelledby="customized-dialog-title" open={modal.active}>
+      <DialogTitle id="customized-dialog-title" onClose={handleModalClose}>
+        {modal.type === 'LOGIN' &&
+          'Kirjaudu sisään'
+        }
+        {modal.type === 'NEW_DIARY_POST' &&
+          'Luo uusi kirjaus'
+        }
+        {modal.type === 'VIEW_DIARY_POST' &&
+          `Kirjaus ${timeFormatter(modal.modalData.date)}`
+        }
       </DialogTitle>
       <DialogContent dividers>
-        <LoginForm />
+        {modal.type === 'LOGIN' &&
+          <LoginForm />
+        }
+        {modal.type === 'NEW_DIARY_POST' &&
+          <PostForm
+            type={modal.type}
+            handleModalClose={handleModalClose}
+          />
+        }
+        {modal.type === 'VIEW_DIARY_POST' &&
+          <PostForm
+            handleModalClose={handleModalClose}
+            modalData={modal.modalData}
+            setReadOnly={setReadOnly}
+            readOnly={readOnly}
+            type={modal.type}
+          />
+        }
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={handleClose} color="primary">
+        {modal.type === 'VIEW_DIARY_POST' &&
+          <Button autoFocus onClick={handleDelete} color="primary">
+            Poista
+          </Button>
+        }
+        <Button
+          autoFocus
+          onClick={() => {
+            setReadOnly(true);
+            handleModalClose()
+          }}
+        >
           Sulje
         </Button>
       </DialogActions>

@@ -4,13 +4,14 @@ const user = localStorage.getItem("currentUser") ? JSON.parse(localStorage.getIt
 
 const initialState = {
   user: user,
-  stores: [],
+  items: [],
   info: [],
   loading: false,
   errorMessage: null,
   modal: {
     type: null,
-    active: false
+    active: false,
+    modalData: null
   }
 };
 
@@ -27,24 +28,24 @@ const { Provider } = store;
 
 const reducer = (state: any, action: any) => {
   switch (action.type) {
-    case "SET_STORES":
+    case "SET_ITEMS":
       return {
         ...state,
-        stores: action.stores
+        items: action.items
       };
-
-    case "HANDLE_MODAL": 
+    case "HANDLE_MODAL":
       return {
         ...state,
         modal: {
           ...state.modal,
           ...action.modal
-        }
+        },
+
       };
     case "LOGIN_SUCCESS":
       return {
         ...state,
-        user: action.userData
+        user: action.user
       }
     case "LOGIN_ERROR":
       return {
@@ -65,7 +66,7 @@ const StateProvider: React.FC = (props: any) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
-    <Provider value={{state, dispatch}}>
+    <Provider value={{ state, dispatch }}>
       {props.children}
     </Provider>
   );
