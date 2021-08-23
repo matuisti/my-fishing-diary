@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
   },
   textarea: {
     resize: "both",
+    color: 'black'
   },
   selectContainer: {
     display: "flex",
@@ -47,6 +48,9 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
     backgroundColor: '#4A6572',
+    color: 'white'
+  },
+  inputEmpty: {
     color: 'white'
   }
 }));
@@ -71,18 +75,19 @@ const PostForm = (props: IPostForm) => {
       id: 1,
       fishSpecies: null,
       lenth: null,
+      time: null
     }]
   });
 
   const [clickedLocation, setClickedLocation] = useState<LatLng | null>(modalData?.location as LatLng || null);
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const { currentTarget: { name, value } } = e;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleDate = (date: any) => {
-    setForm({ ...form, date: date });
+    const { currentTarget, target } = e;
+    if (currentTarget.name) {
+      setForm({ ...form, [currentTarget.name]: currentTarget.value });;
+    } else if (target) {
+      setForm({ ...form, [target.name]: target.value });
+    }
   };
 
   const handleFishDetailChange = (e: React.ChangeEvent<{ name?: string; value: unknown; } | HTMLInputElement>, id: number) => {
@@ -99,6 +104,8 @@ const PostForm = (props: IPostForm) => {
       setForm({ ...form, fishes: fishes });
     }
   };
+
+  const handleDate = (date: any) => setForm({ ...form, date: date });
 
   const handleAddFishRow = () => setForm({ ...form, fishes: [...form.fishes, { id: form.fishes.length + 1 }] });
 
@@ -126,6 +133,8 @@ const PostForm = (props: IPostForm) => {
     }
   };
 
+  console.log(form)
+
   return (
     <Container maxWidth="xl">
       <div className={classes.paper}>
@@ -144,32 +153,59 @@ const PostForm = (props: IPostForm) => {
             value={form?.title || ''}
             onChange={handleInput}
           />
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker
-              disableToolbar
-              variant="inline"
-              inputVariant="outlined"
-              readOnly={props.readOnly}
-              format="d.M.yyyy"
+          <div className={classes.selectContainer}>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <KeyboardDatePicker
+                disableToolbar
+                variant="inline"
+                inputVariant="outlined"
+                readOnly={props.readOnly}
+                format="d.M.yyyy"
+                margin="normal"
+                label="Päiväys"
+                fullWidth
+                value={form.date}
+                InputProps={{
+                  readOnly: props.readOnly
+                }}
+                onChange={handleDate}
+                KeyboardButtonProps={{
+                  'aria-label': 'change date',
+                }}
+              />
+            </MuiPickersUtilsProvider>
+            <TextField
+              label="Sää"
+              variant="outlined"
               margin="normal"
-              label="Päiväys"
-              value={form.date}
-              InputProps={{
-                readOnly: props.readOnly
+              name="weather"
+              fullWidth
+              select
+              SelectProps={{
+                className: classes.textarea,
+                value: form?.weather || '',
+                readOnly: props.readOnly,
+                onChange: (e: any) => handleInput(e),
               }}
-              onChange={handleDate}
-              KeyboardButtonProps={{
-                'aria-label': 'change date',
-              }}
-            />
-          </MuiPickersUtilsProvider>
+            >
+              <MenuItem value={'Aurinkoinen'}>Aurinkoinen</MenuItem>
+              <MenuItem value={'Selkeä'}>Selkeä</MenuItem>
+              <MenuItem value={'Puolipilvinen'}>Puolipilvinen</MenuItem>
+              <MenuItem value={'Sumua'}>Sumu</MenuItem>
+              <MenuItem value={'Pilvinen'}>Pilvinen</MenuItem>
+              <MenuItem value={'Tihkusade'}>Tihkusade</MenuItem>
+              <MenuItem value={'Voimakas sade'}>Voimakas sade</MenuItem>
+              <MenuItem value={'Räntäsade'}>Räntäsade</MenuItem>
+              <MenuItem value={'Lumisade'}>Lumisade</MenuItem>
+            </TextField>
+          </div>
           {(form.fishes || []).map((fish: any) =>
             <div key={fish.id} className={classes.selectContainer}>
               <TextField
                 label="Kalalaji"
                 variant="outlined"
                 margin="normal"
-                style={{ width: 180 }}
+                fullWidth
                 name="fishSpecies"
                 select
                 SelectProps={{
@@ -192,6 +228,7 @@ const PostForm = (props: IPostForm) => {
                 name="length"
                 label="Pituus cm"
                 type="number"
+                fullWidth
                 id="length"
                 inputProps={{
                   className: classes.textarea,
@@ -199,20 +236,36 @@ const PostForm = (props: IPostForm) => {
                   min: 0
                 }}
                 value={fish?.length || ''}
+                onChange={(e: any) => handleFishDetailChange(e, fish.id)}
+              />
+
+              <TextField
+                variant="outlined"
+                label="Aika"
+                type="time"
+                name="time"
+                margin="normal"
+                fullWidth
+                value={fish?.time}
+                InputProps={{
+                  readOnly: props.readOnly,
+                  className: fish?.time ? '' : classes.inputEmpty
+                }}
                 onChange={(e) => {
                   handleFishDetailChange(e, fish.id);
                 }}
               />
+
               {!props.readOnly && (
                 form.fishes.length === fish.id ?
                   <IconButton
                     style={{
                       padding: 2,
-                      color: '#F9AA33'
+                      color: '#4A6572'
                     }}
                     onClick={handleAddFishRow}
                   >
-                    <AddBoxIcon fontSize="default" />
+                    <AddBoxIcon fontSize="medium" />
                   </IconButton>
                   :
                   <IconButton
@@ -222,10 +275,9 @@ const PostForm = (props: IPostForm) => {
                     }}
                     onClick={() => handleDeleteFishRow(fish.id)}
                   >
-                    <CancelIcon fontSize="default" />
+                    <CancelIcon fontSize="medium" />
                   </IconButton>
               )}
-
             </div>
           )}
 
@@ -258,7 +310,11 @@ const PostForm = (props: IPostForm) => {
             disabled={
               props.readOnly ?
                 false :
-                !(!!form?.title && !!form?.description && !!clickedLocation && !!form?.date)
+                !(!!form?.title &&
+                  !!form?.description &&
+                  !!clickedLocation &&
+                  !!form?.date &&
+                  !!form?.weather)
             }
             onClick={handleSubmit}
           >
