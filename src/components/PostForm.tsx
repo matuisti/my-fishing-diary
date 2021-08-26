@@ -167,27 +167,25 @@ const PostForm = (props: IPostForm) => {
     }
   };
 
-  console.log(form)
-
   return (
     <Container maxWidth="xl">
       <div className={classes.paper}>
         <div className={classes.form}>
-          <TextField
-            inputProps={{
-              readOnly: props.readOnly
-            }}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            id="title"
-            label="Otsikko"
-            name="title"
-            autoFocus
-            value={form?.title || ''}
-            onChange={handleInput}
-          />
           <div className={classes.rowContainer}>
+            <TextField
+              inputProps={{
+                readOnly: props.readOnly
+              }}
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              id="title"
+              label="Otsikko"
+              name="title"
+              autoFocus
+              value={form?.title || ''}
+              onChange={handleInput}
+            />
             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
               <KeyboardDatePicker
                 disableToolbar
@@ -208,6 +206,9 @@ const PostForm = (props: IPostForm) => {
                 }}
               />
             </MuiPickersUtilsProvider>
+          </div>
+
+          <div className={classes.rowContainer}>
             <TextField
               label="Sää"
               variant="outlined"
@@ -224,7 +225,7 @@ const PostForm = (props: IPostForm) => {
             >
               {
                 weatherSelect.map((weather: string) =>
-                  <MenuItem value={weather}>{weather}</MenuItem>
+                  <MenuItem key={weather} value={weather}>{weather}</MenuItem>
                 )
               }
             </TextField>
@@ -244,11 +245,12 @@ const PostForm = (props: IPostForm) => {
             >
               {
                 windSelect.map((wind: string) =>
-                  <MenuItem value={wind}>{wind}</MenuItem>
+                  <MenuItem key={wind} value={wind}>{wind}</MenuItem>
                 )
               }
             </TextField>
           </div>
+
           {(form.fishes || []).map((fish: any) =>
             <div key={fish.id} className={classes.rowContainer}>
               <TextField
@@ -267,7 +269,7 @@ const PostForm = (props: IPostForm) => {
               >
                 {
                   fishSelect.map((fish: string) =>
-                    <MenuItem value={fish}>{fish}</MenuItem>
+                    <MenuItem key={fish} value={fish}>{fish}</MenuItem>
                   )
                 }
               </TextField>
@@ -296,7 +298,7 @@ const PostForm = (props: IPostForm) => {
                 name="time"
                 margin="normal"
                 fullWidth
-                value={fish?.time}
+                value={fish?.time || ''}
                 InputProps={{
                   readOnly: props.readOnly,
                   className: fish?.time ? '' : classes.inputEmpty
