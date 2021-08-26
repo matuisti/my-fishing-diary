@@ -1,3 +1,4 @@
+import { fi } from 'date-fns/locale';
 import { LatLng } from 'leaflet';
 import { ChangeEvent, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     resize: "both",
     color: 'black'
   },
-  selectContainer: {
+  rowContainer: {
     display: "flex",
     alignItems: "center",
     columnGap: 8
@@ -55,6 +56,37 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const weatherSelect = [
+  'Aurinkoinen',
+  'Selkeä',
+  'Puolipilvinen',
+  'Pilvinen',
+  'Sumua',
+  'Tihkusade',
+  'Voimakas sade',
+  'Räntäsade',
+  'Lumisade'
+];
+
+const fishSelect = [
+  'Ahven',
+  'Hauki',
+  'Harjus',
+  'Kuha',
+  'Taimen'
+];
+
+const windSelect = [
+  'Pohjoinen',
+  'Koilinen',
+  'Itä',
+  'Kaakko',
+  'Etelä',
+  'Lounas',
+  'Länsi',
+  'Luode'
+];
+
 interface IPostForm {
   modalData?: any;
   readOnly?: boolean;
@@ -71,6 +103,7 @@ const PostForm = (props: IPostForm) => {
   const [form, setForm] = useState(modalData || {
     title: '',
     description: '',
+    date: new Date(),
     fishes: [{
       id: 1,
       fishSpecies: null,
@@ -126,6 +159,7 @@ const PostForm = (props: IPostForm) => {
       updateItem({ ...form, location: clickedLocation }).then(() => {
         getItems(dispatch);
         props.handleModalClose();
+        props.setReadOnly && props.setReadOnly(true);
         toast.success('Muutos tallennettu!');
       }).catch(() => {
         toast.error('Jokin meni vikaan.. 😢');
@@ -153,8 +187,8 @@ const PostForm = (props: IPostForm) => {
             value={form?.title || ''}
             onChange={handleInput}
           />
-          <div className={classes.selectContainer}>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <div className={classes.rowContainer}>
+            <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
               <KeyboardDatePicker
                 disableToolbar
                 variant="inline"
@@ -188,19 +222,35 @@ const PostForm = (props: IPostForm) => {
                 onChange: (e: any) => handleInput(e),
               }}
             >
-              <MenuItem value={'Aurinkoinen'}>Aurinkoinen</MenuItem>
-              <MenuItem value={'Selkeä'}>Selkeä</MenuItem>
-              <MenuItem value={'Puolipilvinen'}>Puolipilvinen</MenuItem>
-              <MenuItem value={'Sumua'}>Sumu</MenuItem>
-              <MenuItem value={'Pilvinen'}>Pilvinen</MenuItem>
-              <MenuItem value={'Tihkusade'}>Tihkusade</MenuItem>
-              <MenuItem value={'Voimakas sade'}>Voimakas sade</MenuItem>
-              <MenuItem value={'Räntäsade'}>Räntäsade</MenuItem>
-              <MenuItem value={'Lumisade'}>Lumisade</MenuItem>
+              {
+                weatherSelect.map((weather: string) =>
+                  <MenuItem value={weather}>{weather}</MenuItem>
+                )
+              }
+            </TextField>
+            <TextField
+              label="Tuuli"
+              variant="outlined"
+              margin="normal"
+              name="wind"
+              fullWidth
+              select
+              SelectProps={{
+                className: classes.textarea,
+                value: form?.wind || '',
+                readOnly: props.readOnly,
+                onChange: (e: any) => handleInput(e),
+              }}
+            >
+              {
+                windSelect.map((wind: string) =>
+                  <MenuItem value={wind}>{wind}</MenuItem>
+                )
+              }
             </TextField>
           </div>
           {(form.fishes || []).map((fish: any) =>
-            <div key={fish.id} className={classes.selectContainer}>
+            <div key={fish.id} className={classes.rowContainer}>
               <TextField
                 label="Kalalaji"
                 variant="outlined"
@@ -215,11 +265,11 @@ const PostForm = (props: IPostForm) => {
                   onChange: (e: any) => handleFishDetailChange(e, fish.id),
                 }}
               >
-                <MenuItem value={'Ahven'}>Ahven</MenuItem>
-                <MenuItem value={'Hauki'}>Hauki</MenuItem>
-                <MenuItem value={'Harjus'}>Harjus</MenuItem>
-                <MenuItem value={'Kuha'}>Kuha</MenuItem>
-                <MenuItem value={'Taimen'}>Taimen</MenuItem>
+                {
+                  fishSelect.map((fish: string) =>
+                    <MenuItem value={fish}>{fish}</MenuItem>
+                  )
+                }
               </TextField>
 
               <TextField
@@ -314,7 +364,8 @@ const PostForm = (props: IPostForm) => {
                   !!form?.description &&
                   !!clickedLocation &&
                   !!form?.date &&
-                  !!form?.weather)
+                  !!form?.weather &&
+                  !!form?.wind)
             }
             onClick={handleSubmit}
           >
