@@ -16,6 +16,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 
 import { ModalTypes } from '../context/actions';
 import { createItem, getItems, store, updateItem } from '../context/index';
+import { fishSelect, weatherSelect, windSelect } from '../helpers/lists';
 import Map from './Map';
 
 const useStyles = makeStyles((theme) => ({
@@ -55,37 +56,6 @@ const useStyles = makeStyles((theme) => ({
     color: 'white'
   }
 }));
-
-const weatherSelect = [
-  'Aurinkoinen',
-  'Selkeä',
-  'Puolipilvinen',
-  'Pilvinen',
-  'Sumua',
-  'Tihkusade',
-  'Voimakas sade',
-  'Räntäsade',
-  'Lumisade'
-];
-
-const fishSelect = [
-  'Ahven',
-  'Hauki',
-  'Harjus',
-  'Kuha',
-  'Taimen'
-];
-
-const windSelect = [
-  'Pohjoinen',
-  'Koilinen',
-  'Itä',
-  'Kaakko',
-  'Etelä',
-  'Lounas',
-  'Länsi',
-  'Luode'
-];
 
 interface IPostForm {
   modalData?: any;
@@ -190,6 +160,7 @@ const PostForm = (props: IPostForm) => {
               <KeyboardDatePicker
                 disableToolbar
                 variant="inline"
+                autoOk
                 inputVariant="outlined"
                 readOnly={props.readOnly}
                 format="d.M.yyyy"
@@ -350,10 +321,13 @@ const PostForm = (props: IPostForm) => {
             onChange={handleInput}
           />
 
-          <Map className={classes.map}
+          <Map
+            className={classes.map}
+            readOnly={props.readOnly}
             setClickedLocation={setClickedLocation}
             clickedLocation={clickedLocation}
           />
+
           <Button
             type="submit"
             fullWidth

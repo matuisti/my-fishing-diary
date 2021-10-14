@@ -26,6 +26,7 @@
     "leaflet": "^1.7.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-leaflet": "^3.2.1",
     "react-scripts": "^4.0.3",
     "react-toastify": "^7.0.4",
     "typescript": "^4.3.2",
@@ -55,7 +56,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@types/leaflet": "^1.7.1",
+    "@types/leaflet": "^1.7.5",
     "dotenv": "^8.2.0",
     "netlify-lambda": "^2.0.8"
   }

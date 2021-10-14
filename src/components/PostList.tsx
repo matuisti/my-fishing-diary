@@ -16,6 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import ImageIcon from '@material-ui/icons/Image';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { getItems, handleModal, store } from '../context/index';
 import { timeFormatter } from '../helpers/helper';
@@ -56,6 +57,11 @@ const useStyles = makeStyles((theme: Theme) =>
       height: 36,
       padding: 12,
       color: '#0000008a'
+    },
+    progress: {
+      display: 'flex',
+      marginTop: 15,
+      color: 'white'
     }
   })
 );
@@ -77,28 +83,34 @@ const PostList = () => {
 
   return (
     <Container className={classes.container}>
-      <List className={classes.list}>
-        {(state.items || []).map((item: any, index: number) =>
-          <Fragment key={item.id}>
-            <ListItem button onClick={() => handleRowClick(item)}>
-              <ListItemAvatar>
-                <Avatar>
-                  <ImageIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={item.title} secondary={timeFormatter(item.date)} />
-              <ListItemSecondaryAction>
-                <IconButton edge="end">
-                  <ArrowForwardIosIcon fontSize="small" />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-            {index + 1 !== state.items.length &&
-              <Divider />
-            }
-          </Fragment>
-        )}
-      </List>
+      {state.items.length ?
+        <List className={classes.list}>
+          {(state.items || []).map((item: any, index: number) =>
+            <Fragment key={item.id}>
+              <ListItem button onClick={() => handleRowClick(item)}>
+                <ListItemAvatar>
+                  <Avatar>
+                    <ImageIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={item.title} secondary={timeFormatter(item.date)} />
+                <ListItemSecondaryAction>
+                  <IconButton edge="end">
+                    <ArrowForwardIosIcon fontSize="small" />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+              {index + 1 !== state.items.length &&
+                <Divider />
+              }
+            </Fragment>
+          )}
+        </List>
+        :
+        <Box className={classes.progress}>
+          <CircularProgress color="inherit" />
+        </Box>
+      }
 
       <Box
         className={classes.addButtonRow}

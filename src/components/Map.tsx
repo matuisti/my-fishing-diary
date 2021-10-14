@@ -1,3 +1,4 @@
+import React from 'react'
 import { useEffect, useRef, HTMLAttributes } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { makeStyles } from '@material-ui/core/styles';
@@ -5,6 +6,7 @@ import LocationOnIcon from '@material-ui/icons/LocationOn'
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import 'leaflet/dist/leaflet.css';
 import L, { LatLng } from 'leaflet';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 
 const useStyles = makeStyles((theme) => ({
   controlIcon: {
@@ -24,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface IMapProps extends HTMLAttributes<HTMLDivElement> {
+  readOnly?: boolean;
   clickedLocation: LatLng | null;
   setClickedLocation?: (latlng: LatLng) => void
 };
@@ -33,6 +36,7 @@ const Map = (props: IMapProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const myLocationRef = useRef<L.Marker | null>(null);
   const clickedLocationRef = useRef<L.Marker | null>(null);
+  const location = [props.clickedLocation?.lat || 64.467261, props.clickedLocation?.lng || 26.577317];
 
   const initMap = () => {
     mapRef.current = L.map('map', {
@@ -65,9 +69,7 @@ const Map = (props: IMapProps) => {
     });
     mapRef.current.addControl(new customControl());
     mapRef.current.on('click', onMapClick);
-    if (props.clickedLocation) {
-      createMarkerOnMap(props.clickedLocation);
-    }
+    props.clickedLocation && createMarkerOnMap(props.clickedLocation);
   };
 
   useEffect(() => {
@@ -97,6 +99,10 @@ const Map = (props: IMapProps) => {
   };
 
   const onMapClick = (e: any) => {
+    console.log(props.readOnly)
+    if (props.readOnly) {
+      return;
+    }
     if (props.setClickedLocation) {
       props.setClickedLocation(e.latlng);
     }
@@ -117,7 +123,25 @@ const Map = (props: IMapProps) => {
     mapRef.current?.addLayer(clickedLocationRef.current);
   }
 
-  return <div className={props.className} id="map" />;
+  return (
+    <div>
+      <div className={props.className} id="map" />
+
+      {/* <MapContainer
+        className={props.className}
+        center={[props.clickedLocation?.lat || 64.467261, props.clickedLocation?.lng || 26.577317]}
+        zoom={4}
+      >
+        <TileLayer
+          url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+        />
+        <Marker
+          position={[props.clickedLocation?.lat || 64.467261, props.clickedLocation?.lng || 26.577317]}
+        />
+      </MapContainer> */}
+
+    </div>
+  );
 };
 
 export default Map;

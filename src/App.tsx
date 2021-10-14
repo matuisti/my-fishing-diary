@@ -1,6 +1,10 @@
 import Box from '@material-ui/core/Box';
 import {
-  createTheme, createStyles, makeStyles, Theme, ThemeProvider
+  createTheme,
+  createStyles,
+  makeStyles,
+  Theme,
+  ThemeProvider
 } from '@material-ui/core/styles';
 
 import Header from './components/Header';
