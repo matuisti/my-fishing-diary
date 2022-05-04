@@ -33,6 +33,7 @@ const Map = (props: IMapProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const myLocationRef = useRef<L.Marker | null>(null);
   const clickedLocationRef = useRef<L.Marker | null>(null);
+  let mousedownInterval: any;
 
   const initMap = () => {
     mapRef.current = L.map('map', {
@@ -64,7 +65,6 @@ const Map = (props: IMapProps) => {
       }
     });
     mapRef.current.addControl(new customControl());
-    let mousedownInterval: any;
     mapRef.current.on('mousedown', (e) => {
       mousedownInterval = setInterval(onMapClick, 1000, e);
     });
