@@ -66,7 +66,7 @@ const Map = (props: IMapProps) => {
     mapRef.current.addControl(new customControl());
     let mousedownInterval: any;
     mapRef.current.on('mousedown', (e) => {
-      mousedownInterval = setInterval(onMapClick, 500, e);
+      mousedownInterval = setInterval(onMapClick, 1000, e);
     });
     mapRef.current.on('mouseup', function() {
       clearInterval(mousedownInterval);
