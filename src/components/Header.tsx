@@ -15,7 +15,7 @@ import { handleModal, logout, store } from '../context/index';
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      flexGrow: 1,
+      display: 'flex',
       backgroundColor: '#232F34',
     },
     title: {
@@ -53,52 +53,50 @@ const Header = () => {
 
 
   return (
-    <div>
-      <AppBar position="static" className={classes.root}>
-        <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Kalapäiväkirja
+    <AppBar className={classes.root}>
+      <Toolbar>
+        <Typography variant="h6" className={classes.title}>
+          Kalapäiväkirja
+        </Typography>
+        {!!state.user?.username &&
+          <Typography
+            className={classes.userLabel}
+          >
+            {state.user.username}
           </Typography>
-          {!!state.user?.username &&
-            <Typography
-              className={classes.userLabel}
-            >
-              {state.user.username}
-            </Typography>
-          }
-          {!!state.user &&
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              color="inherit"
-              aria-label="menu"
-              onClick={() => {
-                handleModal(dispatch, { type: 'NEW_DIARY_POST', active: true });
-              }}>
-              <AddCircleIcon />
-            </IconButton>
-          }
+        }
+        {!!state.user &&
           <IconButton
             edge="start"
             className={classes.menuButton}
             color="inherit"
             aria-label="menu"
-            onClick={handleMenuClick}>
-            <MenuIcon />
+            onClick={() => {
+              handleModal(dispatch, { type: 'NEW_DIARY_POST', active: true });
+            }}>
+            <AddCircleIcon />
           </IconButton>
-          <Menu
-            id="simple-menu"
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={handleClose}>Profiili</MenuItem>
-            <MenuItem onClick={handleClick}>{state.user ? 'Kirjaudu ulos' : 'Kirjaudu sisään'}</MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-    </div>
+        }
+        <IconButton
+          edge="start"
+          className={classes.menuButton}
+          color="inherit"
+          aria-label="menu"
+          onClick={handleMenuClick}>
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem onClick={handleClose}>Profiili</MenuItem>
+          <MenuItem onClick={handleClick}>{state.user ? 'Kirjaudu ulos' : 'Kirjaudu sisään'}</MenuItem>
+        </Menu>
+      </Toolbar>
+    </AppBar>
   );
 };
 

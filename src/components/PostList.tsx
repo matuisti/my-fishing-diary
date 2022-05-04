@@ -23,11 +23,13 @@ import { timeFormatter } from '../helpers/helper';
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
+      flex: '1 0 auto',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       paddingLeft: 40,
-      paddingRight: 40
+      paddingRight: 40,
+      marginBottom: 40,
     },
     list: {
       marginTop: 22,
@@ -35,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: 0,
       backgroundColor: theme.palette.background.paper,
       alignItems: 'center',
-      borderRadius: 7
+      borderRadius: 7,
     },
     addButtonRow: {
       display: 'flex',
@@ -73,12 +75,35 @@ const PostList = () => {
       active: true,
       modalData: item
     });
-  }
+  };
+
+  const posts = state.items.sort((a: any, b: any) => {
+    return new Date(b.date).valueOf() - new Date(a.date).valueOf()
+  });
 
   return (
     <Container className={classes.container}>
+      <Box
+        className={classes.addButtonRow}
+        onClick={() => handleModal(dispatch, { type: 'NEW_DIARY_POST', active: true })}
+      >
+        <Grid
+          container
+          alignItems="center"
+        >
+          <AddCircleOutlineIcon className={classes.largeIcon} />
+          <Typography component="p">Luo uusi kirjaus</Typography>
+        </Grid>
+        <ArrowForwardIosIcon
+          fontSize="small"
+          style={{
+            color: '#0000008a',
+            marginRight: 16,
+          }}
+        />
+      </Box>
       <List className={classes.list}>
-        {(state.items || []).map((item: any, index: number) =>
+        {(posts || []).map((item: any, index: number) =>
           <Fragment key={item.id}>
             <ListItem button onClick={() => handleRowClick(item)}>
               <ListItemAvatar>
@@ -93,34 +118,12 @@ const PostList = () => {
                 </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
-            {index + 1 !== state.items.length &&
+            {index + 1 !== posts.length &&
               <Divider />
             }
           </Fragment>
         )}
       </List>
-
-      <Box
-        className={classes.addButtonRow}
-        onClick={() => handleModal(dispatch, { type: 'NEW_DIARY_POST', active: true })}
-      >
-        <Grid
-          container
-          alignItems="center"
-        >
-          <AddCircleOutlineIcon className={classes.largeIcon} />
-          <Typography component="p">
-            Luo uusi kirjaus
-          </Typography>
-        </Grid>
-        <ArrowForwardIosIcon
-          fontSize="small"
-          style={{
-            color: '#0000008a',
-            marginRight: 16,
-          }}
-        />
-      </Box>
     </Container>
   );
 };

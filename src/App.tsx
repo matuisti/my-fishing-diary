@@ -2,6 +2,7 @@ import Box from '@material-ui/core/Box';
 import {
   createTheme, createStyles, makeStyles, Theme, ThemeProvider
 } from '@material-ui/core/styles';
+import { styled } from '@material-ui/styles';
 
 import Header from './components/Header';
 import Modal from './components/Modal';
@@ -9,6 +10,10 @@ import PostList from './components/PostList';
 import Protected from './components/Protected';
 import Toast from './components/Toast';
 import { StateProvider } from './context/index';
+
+const ContentBox = styled(Box)(({
+  paddingTop: 80
+}))
 
 const theme = createTheme({
   typography: {
@@ -22,7 +27,9 @@ const theme = createTheme({
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      height: '100vh',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
       backgroundColor: '#344955',
     },
     image: {
@@ -34,27 +41,30 @@ const useStyles = makeStyles((theme: Theme) =>
 const App = () => {
   const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <Box className={classes.root}>
       <ThemeProvider theme={theme}>
         <Toast />
         <StateProvider>
           <Header />
           <Modal />
-          <Protected
-            notLoggedIn={
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                minHeight="90vh">
-                <img style={{ maxWidth: 300 }} className={classes.image} src="./fish.png" alt="AppLogo" />
-              </Box>
-            }>
-            <PostList />
-          </Protected>
+          <ContentBox>
+            <Protected
+              notLoggedIn={
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  minHeight="90vh">
+                  <img style={{ maxWidth: 300 }} className={classes.image} src="./fish.png" alt="AppLogo" />
+                </Box>
+              }
+            >
+              <PostList />
+            </Protected>
+          </ContentBox>
         </StateProvider>
       </ThemeProvider>
-    </div>
+    </Box>
   );
 }
 

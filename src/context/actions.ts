@@ -69,7 +69,6 @@ const login = async (dispatch: React.Dispatch<any>, credentials: Ilogin) => {
       dispatch({ type: 'LOGIN_SUCCESS', user: data });
       localStorage.setItem('currentUser', JSON.stringify(data));
     } else {
-      console.log("JEEE")
       dispatch({ type: 'LOGIN_ERROR', error: response.errors[0] });
       return;
     }
